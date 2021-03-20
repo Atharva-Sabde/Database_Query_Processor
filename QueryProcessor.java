@@ -26,6 +26,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 public class QueryProcessor extends ConnectUI implements ActionListener {
 	JFrame frmquery;
@@ -35,6 +36,8 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 	ImageIcon execute ;
 	Image image , newimg;
 	String QRY , OLDQRY;
+	static JTable table;
+	static DefaultTableModel tableModel;
 	
 	
 	public QueryProcessor() {
@@ -42,7 +45,7 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 		frmcon.setVisible(false);
 		frmquery = new JFrame("Query Processor");
 //		frmquery.setVisible(true);
-		frmquery.setSize(1600,1000);
+		frmquery.setSize(1200,750);
 		
 		Image ticon = Toolkit.getDefaultToolkit().getImage(
 				"C:\\Users\\athar\\OneDrive\\Desktop\\customization\\Icons\\Numix Circle For Windows\\PNG\\google-sheets.png");
@@ -64,8 +67,7 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 		qryres = new JLabel("------------------------  Query Output:  ---------------------------------------------------------------------------------------------------------");
 		qryres.setBounds(150, 150,500, 30);
 		qryres.setFont(f4);
-		
-		
+		frmquery.add(qryres);
 		//TExtarea
 		txtqry= new JTextArea();
 		txtqry.setBounds(30,50, 600, 80);
@@ -79,9 +81,7 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 		txtqryresult.setFont(f4);
 	//	frmquery.add(txtqryresult);
 		
-		
 
-		
 		//Buttons
 		btnexecute = new JButton();  //"Execute"
 		btnexecute.setIcon(execute);
@@ -106,11 +106,7 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 		frmquery.add(qryres);
 		
 		
-		//testing delete later>
-//		drvIN = "oracle.jdbc.driver.OracleDriver";
-//		urlIN = "jdbc:oracle:thin:@localhost:1521:xe";
-//		usrIN = "system";
-//		pswIN = "2903";
+	
 		
 		frmquery.setVisible(true);
 		frmquery.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -120,6 +116,9 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 		btnclear.addActionListener(this);
 		
 	}// constructor closed
+//---------------------------------------------------------------------------------------------------------------------------
+	
+	
 	
 	@Override
 	public void actionPerformed(ActionEvent aee) {
@@ -167,7 +166,7 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 			Class.forName(drvIN);
 			System.out.println(drvIN);
 			Connection conn = DriverManager.getConnection(urlIN, usrIN, pswIN);
-			
+			System.err.println("Connected");
 //			table.setAutoscrolls(true);
 			
 			
@@ -176,31 +175,9 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 
 			ResultSetMetaData rsmd = rs.getMetaData();
 			
-//			int colNo = rsmd.getColumnCount();
-//			for (int   i=1 ; i<=colNo  ;  i++) {
-//				tableModel.addColumn(rsmd.getColumnLabel(i));
-//			}
-			//=============================================
-			Vector<String> columnNames= new Vector();
-			int ColumnCount=rs.getMetaData().getColumnCount();
-			int j=1;
-			while(j<=ColumnCount) {
-				columnNames.add( rsmd.getColumnName(j));
-				j++;
-			}
 			
-	
-			DefaultTableModel tableModel = new DefaultTableModel();
-			JTable table = new JTable();
-			table.setModel(tableModel);
-			table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-			table.setFillsViewportHeight(true);
-			JScrollPane jsp = new JScrollPane(table);
-			jsp.setBounds(10,160,800,200);
-			jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-			
-			
+			tableModel = new DefaultTableModel();
+			int colNo = rsmd.getColumnCount();
 			Object[] row = new Object[colNo];
 			while(rs.next()) {
 				for (int i=0 ; i<colNo ; i++) {
@@ -210,11 +187,30 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 				tableModel.addRow(row);
 			}
 
-	//		table.setPreferredScrollableViewportSize();
+	
+			table = new JTable();
+			JTableHeader header = table.getTableHeader();
+			header.setBackground(Color.green);
+			header.setBackground(Color.black);
+			
+			table.setModel(tableModel);
+			table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+			table.setFillsViewportHeight(true);
+			
+			
+			JScrollPane jsp = new JScrollPane(table);
+			jsp.setBounds(10,300,1000,500);
+			jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+			
+			for (int   i=1 ; i<=colNo  ;  i++) {
+				tableModel.addColumn(rsmd.getColumnLabel(i));
+			}
+
+//			table.setPreferredScrollableViewportSize();
 //			table.setBounds(20, 250, 750, 500);
-		
+			
 			frmquery.add(jsp);
-			frmquery.setVisible(true);
 			rs.close();
 			conn.close();
 			return true;
@@ -229,7 +225,7 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 		
 	}
 	
-	
+	//Only for singular queries....
 	private void fetch(String qRY2) throws ClassNotFoundException {
 		try {
 			Class.forName(drvIN);
@@ -256,9 +252,9 @@ public class QueryProcessor extends ConnectUI implements ActionListener {
 		
 	}
 
+	//=========================MAIN===============================
 	public static void main(String[] args) {
 		ConnectUI cnt = new ConnectUI();
-		
 //		QueryProcessor qp = new QueryProcessor();
 	}
 }
